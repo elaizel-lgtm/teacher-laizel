@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mother's Day Lesson</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #fff0f5;
+}
+
+h1 {
+    color: #ff4d6d;
+}
+
+.section {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+}
+
+button {
+    padding: 15px;
+    margin: 10px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #ffb3c6;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ff8fab;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💐 Mother's Day 💐</h1>
+
+<!-- Vocabulary Section -->
+<div class="section">
+<h2>Vocabulary</h2>
+
+<button onclick="speak('mother')">Mother (媽媽)</button>
+<button onclick="speak('love')">Love (愛)</button>
+<button onclick="speak('flower')">Flower (花)</button>
+<button onclick="speak('gift')">Gift (禮物)</button>
+<button onclick="speak('breakfast')">Breakfast (早餐)</button>
+</div>
+
+<!-- Sentence Practice -->
+<div class="section">
+<h2>Speak</h2>
+
+<button onclick="speak('I love my mom')">I love my mom</button>
+<button onclick="speak('I give flowers')">I give flowers</button>
+
+</div>
+
+<!-- Game Section -->
+<div class="section">
+<h2>Guess the Action 🎭</h2>
+
+<p id="emoji">🌸</p>
+
+<button onclick="checkAnswer('flower')">Flower</button>
+<button onclick="checkAnswer('gift')">Gift</button>
+<button onclick="checkAnswer('food')">Food</button>
+
+<p id="result"></p>
+
+</div>
+
+<!-- Quiz -->
+<div class="section">
+<h2>Quiz</h2>
+
+<p>I love my ___</p>
+<button onclick="quiz('mom')">mom</button>
+<button onclick="quiz('cat')">cat</button>
+
+<p id="quizResult"></p>
+
+</div>
+
+<!-- Drawing -->
+<div class="section">
+<h2>Draw your mom 🎨</h2>
+
+<canvas id="canvas" width="300" height="300" style="border:1px solid black;"></canvas><br>
+<button onclick="clearCanvas()">Clear</button>
+
+</div>
+
+<script>
+
+// Speech
+function speak(text) {
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-US";
+    speechSynthesis.speak(speech);
+}
+
+// Game
+let correct = "flower";
+
+function checkAnswer(answer) {
+    if(answer === correct){
+        document.getElementById("result").innerHTML = "✅ Correct!";
+        confetti();
+    } else {
+        document.getElementById("result").innerHTML = "❌ Try again!";
+    }
+}
+
+// Quiz
+function quiz(answer){
+    if(answer === "mom"){
+        document.getElementById("quizResult").innerHTML = "✅ Good!";
+        confetti();
+    } else {
+        document.getElementById("quizResult").innerHTML = "❌ No!";
+    }
+}
+
+// Canvas Drawing
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+let drawing = false;
+
+canvas.onmousedown = () => drawing = true;
+canvas.onmouseup = () => drawing = false;
+
+canvas.onmousemove = (e) => {
+    if(drawing){
+        ctx.fillRect(e.offsetX, e.offsetY, 4, 4);
+    }
+}
+
+function clearCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// Confetti effect
+function confetti(){
+    alert("🎉 Good job!");
+}
+
+</script>
+
+</body>
+</html>
