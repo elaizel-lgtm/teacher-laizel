@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Class - Interactive Lesson</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* COMMON STYLES */
+        .screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            animation: fadeIn 0.5s ease-in;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        /* TITLE SCREEN */
+        #titleScreen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #titleScreen .title {
+            font-size: 120px;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #titleScreen .teacher {
+            position: absolute;
+            bottom: 3rem;
+            font-size: 24px;
+            opacity: 0.8;
+            animation: slideUp 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* MENU SCREEN */
+        #menuScreen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .menu-btn {
+            padding: 1.5rem 3rem;
+            font-size: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 3px solid white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            min-width: 400px;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* NAVIGATION */
+        .nav-container {
+            position: absolute;
+            bottom: 2rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            z-index: 20;
+        }
+
+        .nav-btn {
+            padding: 1rem 2rem;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* CHOICE BUTTONS */
+        .choice-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .choice-btn {
+            padding: 2rem;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 3px solid white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .choice-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .choice-btn img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        /* TITLE SECTION */
+        .section-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* VOCABULARY GRID */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .vocab-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .vocab-card:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .vocab-icon {
+            font-size: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .vocab-word {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .vocab-meaning {
+            font-size: 18px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .vocab-card:hover .vocab-meaning {
+            opacity: 1;
+        }
+
+        .vocab-hint {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        /* QUESTION REVEAL */
+        .question-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid white;
+            margin: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            max-width: 600px;
+        }
+
+        .question-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .question-text {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .meaning-box {
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-item:hover .meaning-box {
+            opacity: 1;
+        }
+
+        .chinese-hint {
+            font-size: 16px;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        /* STORY SLIDE */
+        .story-slide-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .story-sentence {
+            font-size: 54px;
+            font-weight: bold;
+            max-width: 80%;
+            line-height: 1.4;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .story-photo-placeholder {
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px dashed white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        /* PLACES CARD */
+        .places-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        .place-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid white;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 200px;
+        }
+
+        .place-card:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .place-image {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .place-name {
+            padding: 1rem;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* INPUT FIELDS */
+        input[type="text"] {
+            padding: 1rem;
+            font-size: 18px;
+            border: 2px solid white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 0.5rem 0;
+            color: #333;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .form-label {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* GAME SCREENS */
+        #gameScreen {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .scoreboard {
+            position: fixed;
+            top: 2rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            z-index: 15;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .team-score {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            min-width: 150px;
+        }
+
+        .game-content {
+            margin-top: 8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+        }
+
+        .game-question {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 2rem;
+            max-width: 90%;
+        }
+
+        .answer-choices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .answer-btn {
+            padding: 2rem;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 3px solid white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn.correct {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .answer-btn.incorrect {
+            background: #f44336;
+            border-color: #f44336;
+        }
+
+        /* CONFETTI */
+        .confetti {
+            position: fixed;
+            z-index: 25;
+            pointer-events: none;
+        }
+
+        /* FULLSCREEN BUTTON */
+        .fullscreen-btn {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 30;
+            transition: all 0.3s;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* EMOJI REACTIONS */
+        .emoji-reaction {
+            position: fixed;
+            font-size: 60px;
+            pointer-events: none;
+            z-index: 20;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+
+        /* SLIDE COUNTER */
+        .slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            z-index: 15;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            #titleScreen .title {
+                font-size: 60px;
+            }
+
+            .menu-btn {
+                min-width: 80vw;
+                font-size: 24px;
+            }
+
+            .section-title {
+                font-size: 36px;
+            }
+
+            .story-sentence {
+                font-size: 36px;
+            }
+
+            .choice-container {
+                grid-template-columns: 1fr;
+            }
+
+            .vocab-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .places-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .answer-choices {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TITLE SCREEN -->
+    <div id="titleScreen" class="screen active">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="title">ENGLISH CLASS</div>
+            <div class="teacher">teacher laizel</div>
+        </div>
+    </div>
+
+    <!-- MENU SCREEN -->
+    <div id="menuScreen" class="screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="menu-container">
+                <button class="menu-btn" onclick="startLesson()">▶️ Start Lesson</button>
+                <button class="menu-btn" onclick="startGame()">🎮 Team Battle Game</button>
+            </div>
+            <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Full Screen</button>
+        </div>
+    </div>
+
+    <!-- WARMUP SCREEN -->
+    <div id="warmupScreen" class="screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="section-title">Where do you want to go?</div>
+            <div class="choice-container">
+                <button class="choice-btn" onclick="selectDestination('philippines')">
+                    🇵🇭 Philippines (Cebu)
+                </button>
+                <button class="choice-btn" onclick="selectDestination('taiwan')">
+                    🇹🇼 Taiwan (Taichung)
+                </button>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="backToMenu()">← Back to Menu</button>
+            <button class="nav-btn" onclick="nextSlide()" id="warmupNext">Next →</button>
+        </div>
+    </div>
+
+    <!-- KEY QUESTIONS SCREEN -->
+    <div id="questionsScreen" class="screen" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="section-title">Key Questions 🤔</div>
+            <!-- EDIT TEXT HERE -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%; align-items: center;">
+                <div class="question-item" onclick="toggleMeaning(this)">
+                    <div class="question-text">Where are you from?</div>
+                    <div class="meaning-box">
+                        ➡️ Asking about your hometown/country
+                        <div class="chinese-hint">你来自哪里？</div>
+                    </div>
+                </div>
+                <div class="question-item" onclick="toggleMeaning(this)">
+                    <div class="question-text">How long have you been here?</div>
+                    <div class="meaning-box">
+                        ➡️ Asking how much time you spent in a place
+                        <div class="chinese-hint">你在这里多久了？</div>
+                    </div>
+                </div>
+                <div class="question-item" onclick="toggleMeaning(this)">
+                    <div class="question-text">Why did you come here?</div>
+                    <div class="meaning-box">
+                        ➡️ Asking the reason for your visit/move
+                        <div class="chinese-hint">你为什么来这里？</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- VOCABULARY SCREEN -->
+    <div id="vocabScreen" class="screen" style="background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="section-title">Travel Vocabulary 🧳</div>
+            <!-- EDIT VOCAB HERE -->
+            <div class="vocab-grid">
+                <!-- BEACH -->
+                <div class="vocab-card">
+                    <div class="vocab-icon">🏖️</div>
+                    <div class="vocab-word">Beach</div>
+                    <div class="vocab-meaning">
+                        Sandy shore by the sea
+                        <div class="vocab-hint">海滩</div>
+                    </div>
+                </div>
+                <!-- ISLAND -->
+                <div class="vocab-card">
+                    <div class="vocab-icon">🏝️</div>
+                    <div class="vocab-word">Island</div>
+                    <div class="vocab-meaning">
+                        Land surrounded by water
+                        <div class="vocab-hint">岛屿</div>
+                    </div>
+                </div>
+                <!-- HAGGLE (SPECIAL) -->
+                <div class="vocab-card">
+                    <div class="vocab-icon">💰</div>
+                    <div class="vocab-word">Haggle</div>
+                    <div class="vocab-meaning">
+                        Ask for a lower price 💡
+                        <div class="vocab-hint">讨价还价</div>
+                        <div style="margin-top: 0.5rem; font-size: 16px;">
+                            "Too expensive!" / "Cheaper please!"
+                        </div>
+                    </div>
+                </div>
+                <!-- TRAVEL -->
+                <div class="vocab-card">
+                    <div class="vocab-icon">✈️</div>
+                    <div class="vocab-word">Travel</div>
+                    <div class="vocab-meaning">
+                        Go to different places
+                        <div class="vocab-hint">旅行</div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; font-size: 18px; opacity: 0.8;">
+                💡 Hover over cards to see meaning
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- CEBU PLACES SCREEN -->
+    <div id="placesScreen" class="screen" style="background: linear-gradient(135deg, #fbc02d 0%, #ff9800 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="section-title">Places in Cebu 🗺️</div>
+            <div class="places-grid">
+                <!-- EDIT STORY HERE -->
+                <div class="place-card" onclick="showPlaceInfo('Cebu City')">
+                    <div class="place-image">🏙️</div>
+                    <div class="place-name">Cebu City</div>
+                </div>
+                <div class="place-card" onclick="showPlaceInfo('Mactan Island')">
+                    <div class="place-image">🏖️</div>
+                    <div class="place-name">Mactan Island</div>
+                </div>
+                <div class="place-card" onclick="showPlaceInfo('Oslob')">
+                    <div class="place-image">🐋</div>
+                    <div class="place-name">Oslob</div>
+                </div>
+                <div class="place-card" onclick="showPlaceInfo('Moalboal')">
+                    <div class="place-image">🌊</div>
+                    <div class="place-name">Moalboal</div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- TEACHER STORY SLIDES -->
+    <div id="storyScreen1" class="screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">I am from Cebu. 🇵🇭</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <div id="storyScreen2" class="screen" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">Cebu is very beautiful. 🌴</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <div id="storyScreen3" class="screen" style="background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">I like the beach. 🏖️</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <div id="storyScreen4" class="screen" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">I came to Taiwan 3 years ago. 🇹🇼</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <div id="storyScreen5" class="screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">I have been to some places in Taiwan. ✨</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <div id="storyScreen6" class="screen" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">My first work in Taiwan as a teacher was in Dongyin, Matsu. 🎓</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <div id="storyScreen7" class="screen" style="background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="story-slide-content">
+                <div class="story-sentence">Now, I work and live in Dongshi, Taichung. 🏠</div>
+                <div class="story-photo-placeholder">[ Upload Teacher Photo Here ]</div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE QUESTION SCREEN -->
+    <div id="questionScreen" class="screen" style="background: linear-gradient(135deg, #fbc02d 0%, #ff9800 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="section-title">Teacher's Question 🤔</div>
+            <div style="font-size: 48px; font-weight: bold; margin: 2rem; max-width: 90%;">
+                Where am I from?
+            </div>
+            <div style="font-size: 32px; background: rgba(255, 255, 255, 0.2); padding: 2rem; border-radius: 15px; border: 2px solid white; max-width: 90%;">
+                💡 Think about the story you just heard...
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- PAIR PRACTICE SCREEN -->
+    <div id="pairPracticeScreen" class="screen" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="section-title">Pair Practice 🤝</div>
+            <div style="font-size: 32px; line-height: 1.8; max-width: 90%; margin: 2rem;">
+                <div style="margin: 1rem; background: rgba(255, 255, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+                    ❓ Where are you from?
+                </div>
+                <div style="margin: 1rem; background: rgba(255, 255, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+                    ❓ Do you like the beach?
+                </div>
+                <div style="margin: 1rem; background: rgba(255, 255, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+                    ❓ Have you been to ______?
+                </div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- MY STORY SCREEN -->
+    <div id="myStoryScreen" class="screen" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="overlay"></div>
+        <div class="content" style="overflow-y: auto; max-height: 100vh; justify-content: flex-start; padding-top: 3rem;">
+            <div class="section-title">My Story 📖</div>
+            
+            <div class="form-group">
+                <label class="form-label">I am from ______.</label>
+                <input type="text" id="myFrom" placeholder="e.g., Philippines" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">I live in ______.</label>
+                <input type="text" id="myLive" placeholder="e.g., Taichung" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">I like ______.</label>
+                <input type="text" id="myLike" placeholder="e.g., the beach" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">I have been to ______.</label>
+                <input type="text" id="myBeen" placeholder="e.g., Taiwan" />
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; flex-wrap: wrap;">
+                <button class="menu-btn" style="min-width: auto; padding: 1rem 2rem;" onclick="showStoryExample()">
+                    📝 Show Example
+                </button>
+                <button class="menu-btn" style="min-width: auto; padding: 1rem 2rem;" onclick="speakMyStory()">
+                    🔊 Speak Mode
+                </button>
+            </div>
+
+            <div id="storyOutput" style="background: rgba(255, 255, 255, 0.2); padding: 2rem; border-radius: 15px; border: 2px solid white; font-size: 22px; line-height: 1.8; max-width: 90%; margin: 1rem auto; min-height: 100px; white-space: pre-wrap;">
+                <!-- Story will appear here -->
+            </div>
+
+            <div style="margin-bottom: 8rem;"></div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="previousSlide()">← Back</button>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <div class="overlay"></div>
+        <div class="scoreboard">
+            <div class="team-score">🔴 Team A<br/><span id="scoreA">0</span></div>
+            <div class="team-score">🔵 Team B<br/><span id="scoreB">0</span></div>
+        </div>
+        <div class="content">
+            <div class="game-content">
+                <div class="timer">⏱️ <span id="gameTimer">8</span>s</div>
+                <div class="game-question" id="gameQuestion">Which is the capital of Cebu province?</div>
+                <div class="answer-choices" id="answerChoices">
+                    <!-- Questions will be populated here -->
+                </div>
+            </div>
+        </div>
+        <div class="nav-container">
+            <button class="nav-btn" onclick="backToMenu()">← Back to Menu</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="gameOverScreen" class="screen" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="overlay"></div>
+        <div class="content">
+            <div style="font-size: 54px; margin-bottom: 2rem;">🎮 Game Over!</div>
+            <div style="font-size: 42px; margin: 1rem;">
+                🔴 Team A: <span id="finalScoreA">0</span>
+            </div>
+            <div style="font-size: 42px; margin: 1rem;">
+                🔵 Team B: <span id="finalScoreB">0</span>
+            </div>
+            <div id="winner" style="font-size: 48px; margin: 2rem; font-weight: bold;"></div>
+            <button class="menu-btn" onclick="startGame()" style="margin-top: 2rem;">
+                🔄 Play Again
+            </button>
+            <button class="menu-btn" onclick="backToMenu()" style="margin-top: 1rem;">
+                ← Back to Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ===== STATE MANAGEMENT =====
+        let currentScreen = 0;
+        let screenList = [
+            'titleScreen', 'menuScreen', 'warmupScreen', 'questionsScreen', 'vocabScreen',
+            'placesScreen', 'storyScreen1', 'storyScreen2', 'storyScreen3', 'storyScreen4',
+            'storyScreen5', 'storyScreen6', 'storyScreen7', 'questionScreen', 'pairPracticeScreen',
+            'myStoryScreen'
+        ];
+
+        let gameData = {
+            teamA: 0,
+            teamB: 0,
+            currentQuestion: 0,
+            totalQuestions: 5
+        };
+
+        // ===== SCREEN MANAGEMENT =====
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startLesson() {
+            currentScreen = 2;
+            showScreen('warmupScreen');
+            playReaction('🎉');
+        }
+
+        function startGame() {
+            gameData.teamA = 0;
+            gameData.teamB = 0;
+            gameData.currentQuestion = 0;
+            showScreen('gameScreen');
+            loadGameQuestion();
+            playReaction('🎮');
+        }
+
+        function backToMenu() {
+            currentScreen = 1;
+            showScreen('menuScreen');
+        }
+
+        function nextSlide() {
+            if (currentScreen < screenList.length - 1) {
+                currentScreen++;
+                showScreen(screenList[currentScreen]);
+            }
+        }
+
+        function previousSlide() {
+            if (currentScreen > 2) {
+                currentScreen--;
+                showScreen(screenList[currentScreen]);
+            }
+        }
+
+        function selectDestination(destination) {
+            playReaction('✈️');
+            nextSlide();
+        }
+
+        // ===== INTERACTIONS =====
+        function toggleMeaning(element) {
+            const meaning = element.querySelector('.meaning-box');
+            if (meaning.style.opacity === '0' || meaning.style.opacity === '') {
+                meaning.style.opacity = '1';
+            } else {
+                meaning.style.opacity = '0';
+            }
+            playReaction('💡');
+        }
+
+        function showPlaceInfo(place) {
+            alert('📍 ' + place + '\n\nClick next to continue!');
+            playReaction('🗺️');
+        }
+
+        // ===== MY STORY FEATURE =====
+        function showStoryExample() {
+            const example = `I am from the Philippines.
+I live in Taiwan.
+I like the beach and traveling.
+I have been to Cebu, Manila, and Taichung.`;
+            document.getElementById('storyOutput').textContent = example;
+            playReaction('📝');
+        }
+
+        function buildMyStory() {
+            const from = document.getElementById('myFrom').value || '[your country]';
+            const live = document.getElementById('myLive').value || '[your city]';
+            const like = document.getElementById('myLike').value || '[something]';
+            const been = document.getElementById('myBeen').value || '[a place]';
+
+            const story = `I am from ${from}.
+I live in ${live}.
+I like ${like}.
+I have been to ${been}.`;
+
+            document.getElementById('storyOutput').textContent = story;
+            playReaction('📖');
+        }
+
+        function speakMyStory() {
+            buildMyStory();
+            const text = document.getElementById('storyOutput').textContent;
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+                playReaction('🔊');
+            }
+        }
+
+        // Update story as user types
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('#myFrom, #myLive, #myLike, #myBeen')) {
+                buildMyStory();
+            }
+        });
+
+        // ===== GAME LOGIC =====
+        const GAME_QUESTIONS = [
+            {
+                question: "Which is the capital of Cebu province?",
+                answers: ["Cebu City", "Manila"],
+                correct: 0
+            },
+            {
+                question: "Mactan Island is famous for...",
+                answers: ["Oslob Whale Sharks", "Mactan Island Resorts"],
+                correct: 1
+            },
+            {
+                question: "Teacher Laizel came to Taiwan how many years ago?",
+                answers: ["5 years", "3 years"],
+                correct: 1
+            },
+            {
+                question: "What does 'haggle' mean?",
+                answers: ["Ask for lower price", "Buy something"],
+                correct: 0
+            },
+            {
+                question: "Where does Teacher Laizel work now?",
+                answers: ["Dongyin, Matsu", "Dongshi, Taichung"],
+                correct: 1
+            }
+        ];
+
+        function loadGameQuestion() {
+            if (gameData.currentQuestion >= gameData.totalQuestions) {
+                endGame();
+                return;
+            }
+
+            const q = GAME_QUESTIONS[gameData.currentQuestion];
+            document.getElementById('gameQuestion').textContent = q.question;
+            
+            let html = '';
+            q.answers.forEach((ans, idx) => {
+                html += `<button class="answer-btn" onclick="checkAnswer(${idx}, ${q.correct})">
+                    ${ans}
+                </button>`;
+            });
+            document.getElementById('answerChoices').innerHTML = html;
+
+            startGameTimer();
+        }
+
+        let timerInterval;
+        function startGameTimer() {
+            let time = 8;
+            document.getElementById('gameTimer').textContent = time;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                time--;
+                document.getElementById('gameTimer').textContent = time;
+                if (time <= 0) {
+                    clearInterval(timerInterval);
+                    nextGameQuestion();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(selected, correct) {
+            clearInterval(timerInterval);
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === correct) {
+                    btn.classList.add('correct');
+                    playReaction('✅');
+                } else if (idx === selected && selected !== correct) {
+                    btn.classList.add('incorrect');
+                    playReaction('❌');
+                }
+            });
+
+            if (selected === correct) {
+                if (gameData.currentQuestion % 2 === 0) {
+                    gameData.teamA++;
+                } else {
+                    gameData.teamB++;
+                }
+                playReaction('🎉');
+                createConfetti();
+            }
+
+            document.getElementById('scoreA').textContent = gameData.teamA;
+            document.getElementById('scoreB').textContent = gameData.teamB;
+
+            setTimeout(() => {
+                nextGameQuestion();
+            }, 2000);
+        }
+
+        function nextGameQuestion() {
+            gameData.currentQuestion++;
+            loadGameQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('finalScoreA').textContent = gameData.teamA;
+            document.getElementById('finalScoreB').textContent = gameData.teamB;
+            
+            let winner = '';
+            if (gameData.teamA > gameData.teamB) {
+                winner = '🔴 Team A Wins! 🏆';
+                playReaction('🏆');
+            } else if (gameData.teamB > gameData.teamA) {
+                winner = '🔵 Team B Wins! 🏆';
+                playReaction('🏆');
+            } else {
+                winner = '🤝 It\'s a Tie!';
+                playReaction('🤝');
+            }
+            document.getElementById('winner').textContent = winner;
+            showScreen('gameOverScreen');
+        }
+
+        // ===== EFFECTS =====
+        function playReaction(emoji) {
+            const reaction = document.createElement('div');
+            reaction.className = 'emoji-reaction';
+            reaction.textContent = emoji;
+            reaction.style.left = Math.random() * 80 + 10 + '%';
+            reaction.style.top = '50%';
+            document.body.appendChild(reaction);
+            setTimeout(() => reaction.remove(), 1000);
+        }
+
+        function createConfetti() {
+            const colors = ['🎉', '🎊', '⭐', '✨', '🌟'];
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = Math.random() * 100 + '%';
+                confetti.style.fontSize = (20 + Math.random() * 20) + 'px';
+                confetti.style.animation = `floatUp ${1 + Math.random()}s ease-out forwards`;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 1500);
+            }
+        }
+
+        // ===== FULLSCREEN =====
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // ===== KEYBOARD NAVIGATION =====
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+            if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+        });
+
+        // ===== INIT MESSAGE =====
+        console.log('✅ English Class Interactive Lesson Loaded!');
+        console.log('💡 Tip: Use arrow keys to navigate, press F for fullscreen');
+    </script>
+</body>
+</html>
