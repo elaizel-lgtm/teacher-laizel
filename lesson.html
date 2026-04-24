@@ -195,19 +195,16 @@
             transition: all 0.3s;
             font-weight: bold;
             font-family: 'Handlee', cursive;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
         }
 
         .choice-btn:hover {
             background: rgba(255, 255, 255, 0.4);
             transform: scale(1.05);
-        }
-
-        .choice-btn img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 1rem;
         }
 
         /* TITLE SECTION */
@@ -366,6 +363,10 @@
             cursor: pointer;
             transition: all 0.3s;
             min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .place-card:hover {
@@ -374,13 +375,8 @@
         }
 
         .place-image {
-            width: 100%;
-            height: 150px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
+            font-size: 60px;
+            margin-bottom: 1rem;
         }
 
         .place-name {
@@ -449,12 +445,34 @@
             gap: 2rem;
         }
 
-        .timer {
+        .timer-display {
             font-size: 48px;
             font-weight: bold;
             background: rgba(255, 255, 255, 0.2);
             padding: 1rem 2rem;
             border-radius: 10px;
+            min-width: 150px;
+        }
+
+        .timer-btn {
+            padding: 1rem 2rem;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Handlee', cursive;
+            transition: all 0.3s;
+        }
+
+        .timer-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .timer-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .game-question {
@@ -552,18 +570,6 @@
             }
         }
 
-        /* SLIDE COUNTER */
-        .slide-counter {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            font-size: 18px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            z-index: 15;
-        }
-
         /* RESPONSIVE */
         @media (max-width: 768px) {
             #titleScreen .title {
@@ -635,10 +641,10 @@
             <div class="section-title">Where do you want to go?</div>
             <div class="choice-container">
                 <button class="choice-btn" onclick="selectDestination('philippines')">
-                    🇵🇭 Philippines (Cebu)
+                    🇵🇭 Philippines<br/>(Cebu)
                 </button>
                 <button class="choice-btn" onclick="selectDestination('taiwan')">
-                    🇹🇼 Taiwan (Taichung)
+                    🇹🇼 Taiwan<br/>(Taichung)
                 </button>
             </div>
         </div>
@@ -968,7 +974,10 @@
         </div>
         <div class="content">
             <div class="game-content">
-                <div class="timer">⏱️ <span id="gameTimer">8</span>s</div>
+                <div class="timer-display">
+                    ⏱️ <span id="gameTimer">20</span>s
+                </div>
+                <button class="timer-btn" id="startTimerBtn" onclick="startTimer()">▶️ Start Timer</button>
                 <div class="game-question" id="gameQuestion">Which is the capital of Cebu province?</div>
                 <div class="answer-choices" id="answerChoices">
                     <!-- Questions will be populated here -->
@@ -1015,8 +1024,11 @@
             teamA: 0,
             teamB: 0,
             currentQuestion: 0,
-            totalQuestions: 5
+            totalQuestions: 5,
+            timerActive: false
         };
+
+        let timerInterval = null;
 
         // ===== SCREEN MANAGEMENT =====
         function showScreen(screenId) {
@@ -1034,6 +1046,7 @@
             gameData.teamA = 0;
             gameData.teamB = 0;
             gameData.currentQuestion = 0;
+            gameData.timerActive = false;
             showScreen('gameScreen');
             loadGameQuestion();
             playReaction('🎮');
@@ -1041,6 +1054,8 @@
 
         function backToMenu() {
             currentScreen = 1;
+            gameData.timerActive = false;
+            if (timerInterval) clearInterval(timerInterval);
             showScreen('menuScreen');
         }
 
@@ -1157,6 +1172,10 @@ I have been to ${been}.`;
                 return;
             }
 
+            gameData.timerActive = false;
+            document.getElementById('startTimerBtn').disabled = false;
+            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
+
             const q = GAME_QUESTIONS[gameData.currentQuestion];
             document.getElementById('gameQuestion').textContent = q.question;
             
@@ -1167,27 +1186,38 @@ I have been to ${been}.`;
                 </button>`;
             });
             document.getElementById('answerChoices').innerHTML = html;
-
-            startGameTimer();
+            document.getElementById('gameTimer').textContent = '20';
         }
 
-        let timerInterval;
-        function startGameTimer() {
-            let time = 8;
+        function startTimer() {
+            if (gameData.timerActive) return;
+            gameData.timerActive = true;
+            document.getElementById('startTimerBtn').disabled = true;
+
+            let time = 20;
             document.getElementById('gameTimer').textContent = time;
-            clearInterval(timerInterval);
+            
+            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 time--;
                 document.getElementById('gameTimer').textContent = time;
                 if (time <= 0) {
                     clearInterval(timerInterval);
-                    nextGameQuestion();
+                    document.getElementById('startTimerBtn').disabled = false;
                 }
             }, 1000);
         }
 
         function checkAnswer(selected, correct) {
-            clearInterval(timerInterval);
+            if (!gameData.timerActive) {
+                alert('Please start the timer first! ⏱️');
+                return;
+            }
+
+            gameData.timerActive = false;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('startTimerBtn').disabled = false;
+
             const buttons = document.querySelectorAll('.answer-btn');
             
             buttons.forEach((btn, idx) => {
@@ -1215,13 +1245,9 @@ I have been to ${been}.`;
             document.getElementById('scoreB').textContent = gameData.teamB;
 
             setTimeout(() => {
-                nextGameQuestion();
+                gameData.currentQuestion++;
+                loadGameQuestion();
             }, 2000);
-        }
-
-        function nextGameQuestion() {
-            gameData.currentQuestion++;
-            loadGameQuestion();
         }
 
         function endGame() {
